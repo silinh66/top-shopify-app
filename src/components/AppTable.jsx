@@ -1,15 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import allApps from '../data/topAppsRecent.json';
+import { translations, categoryTranslations } from '../translations';
 
-const AppTable = () => {
+const AppTable = ({ lang = 'vi' }) => {
+    const t = translations[lang];
     const [search, setSearch] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: 'reviews', direction: 'desc' });
     const [page, setPage] = useState(1);
 
-    // New Filters
+    // Filters
     const [minReviews, setMinReviews] = useState('');
     const [minRating, setMinRating] = useState('');
-    const [dateRange, setDateRange] = useState('all'); // all, 1m, 2m, 3m, 6m, custom
+    const [dateRange, setDateRange] = useState('all');
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
 
@@ -17,9 +19,16 @@ const AppTable = () => {
 
     const parseDate = (dateStr) => {
         if (!dateStr) return null;
-        // Remove "· Changelog" or other artifacts if present
         const cleanStr = dateStr.split('·')[0].trim();
         return new Date(cleanStr);
+    };
+
+    const parseCategory = (catStr) => {
+        if (!catStr) return '';
+        // Valid categories usually have just the name, but data might have "Category Name\n\n243 apps"
+        // We take the first line
+        const baseName = catStr.split('\n')[0].trim();
+        return baseName;
     };
 
     const filteredData = useMemo(() => {
@@ -74,10 +83,17 @@ const AppTable = () => {
             let valA = a[sortConfig.key];
             let valB = b[sortConfig.key];
 
-            // Handle dates for sorting
             if (sortConfig.key === 'launchDate') {
                 valA = parseDate(valA) || new Date(0);
                 valB = parseDate(valB) || new Date(0);
+            }
+
+            // Category Sort (Translated)
+            if (sortConfig.key === 'category') {
+                const catA = parseCategory(valA);
+                const catB = parseCategory(valB);
+                valA = categoryTranslations[catA] || catA;
+                valB = categoryTranslations[catB] || catB;
             }
 
             if (valA < valB) {
@@ -110,16 +126,24 @@ const AppTable = () => {
     return (
         <div className="animate-enter">
             <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'end' }}>
+                {/* Responsive Grid Layout for Filters */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '1.5rem',
+                    alignItems: 'end'
+                }}>
 
-                    {/* Search */}
-                    <div style={{ flex: '1 1 300px' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Search</label>
+                    {/* Search (Takes full width on small, 2 cols on huge screens if needed, but auto-fit handles it) */}
+                    <div style={{ gridColumn: 'span 1' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            {t.appName} / {t.date}
+                        </label>
                         <input
                             type="text"
-                            placeholder="App name..."
+                            placeholder={t.searchPlaceholder}
                             className="search-input"
-                            style={{ width: '100%' }}
+                            style={{ width: '100%', boxSizing: 'border-box' }} // Ensure padding doesn't overflow
                             value={search}
                             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                         />
@@ -127,12 +151,12 @@ const AppTable = () => {
 
                     {/* Reviews Filter */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Min Reviews</label>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t.minReviews}</label>
                         <input
                             type="number"
                             placeholder="e.g. 50"
                             className="search-input"
-                            style={{ width: '120px' }}
+                            style={{ width: '100%', boxSizing: 'border-box' }}
                             value={minReviews}
                             onChange={(e) => { setMinReviews(e.target.value); setPage(1); }}
                         />
@@ -140,13 +164,13 @@ const AppTable = () => {
 
                     {/* Rating Filter */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Min Rating</label>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t.minRating}</label>
                         <input
                             type="number"
                             placeholder="e.g. 4.5"
                             step="0.1"
                             className="search-input"
-                            style={{ width: '100px' }}
+                            style={{ width: '100%', boxSizing: 'border-box' }}
                             value={minRating}
                             onChange={(e) => { setMinRating(e.target.value); setPage(1); }}
                         />
@@ -154,19 +178,19 @@ const AppTable = () => {
 
                     {/* Date Filter */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Launch Date</label>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t.launchDate}</label>
                         <select
                             className="search-input"
                             value={dateRange}
                             onChange={(e) => { setDateRange(e.target.value); setPage(1); }}
-                            style={{ cursor: 'pointer' }}
+                            style={{ cursor: 'pointer', width: '100%', boxSizing: 'border-box' }}
                         >
-                            <option value="all">Any Time</option>
-                            <option value="1m">Last 1 Month</option>
-                            <option value="2m">Last 2 Months</option>
-                            <option value="3m">Last 3 Months</option>
-                            <option value="6m">Last 6 Months</option>
-                            <option value="custom">Custom Range</option>
+                            <option value="all">{t.anyTime}</option>
+                            <option value="1m">{t.last1Month}</option>
+                            <option value="2m">{t.last2Months}</option>
+                            <option value="3m">{t.last3Months}</option>
+                            <option value="6m">{t.last6Months}</option>
+                            <option value="custom">{t.customRange}</option>
                         </select>
                     </div>
 
@@ -174,29 +198,31 @@ const AppTable = () => {
                     {dateRange === 'custom' && (
                         <>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>From</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t.from}</label>
                                 <input
                                     type="date"
                                     className="search-input"
+                                    style={{ width: '100%', boxSizing: 'border-box' }}
                                     value={customStart}
                                     onChange={(e) => { setCustomStart(e.target.value); setPage(1); }}
                                 />
                             </div>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>To</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t.to}</label>
                                 <input
                                     type="date"
                                     className="search-input"
+                                    style={{ width: '100%', boxSizing: 'border-box' }}
                                     value={customEnd}
                                     onChange={(e) => { setCustomEnd(e.target.value); setPage(1); }}
                                 />
                             </div>
                         </>
                     )}
+                </div>
 
-                    <div style={{ marginLeft: 'auto', paddingBottom: '0.5rem', color: 'var(--text-secondary)' }}>
-                        Found: <strong style={{ color: '#fff' }}>{filteredData.length}</strong> apps
-                    </div>
+                <div style={{ marginTop: '1rem', textAlign: 'right', color: 'var(--text-secondary)' }}>
+                    {t.foundApps}: <strong style={{ color: '#fff' }}>{filteredData.length}</strong> apps
                 </div>
             </div>
 
@@ -205,42 +231,55 @@ const AppTable = () => {
                     <table className="data-table">
                         <thead>
                             <tr>
-                                <th onClick={() => handleSort('name')}>App Name {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</th>
-                                <th onClick={() => handleSort('reviews')}>Reviews {sortConfig.key === 'reviews' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</th>
-                                <th onClick={() => handleSort('rating')}>Rating {sortConfig.key === 'rating' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</th>
-                                <th onClick={() => handleSort('launchDate')}>Launch Date {sortConfig.key === 'launchDate' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</th>
-                                <th>Velocity</th>
+                                <th onClick={() => handleSort('name')}>
+                                    {t.appName} {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                </th>
+                                <th onClick={() => handleSort('category')}>
+                                    {t.category} {sortConfig.key === 'category' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                </th>
+                                <th onClick={() => handleSort('reviews')}>
+                                    {t.reviews} {sortConfig.key === 'reviews' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                </th>
+                                <th onClick={() => handleSort('rating')}>
+                                    {t.rating} {sortConfig.key === 'rating' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                </th>
+                                <th onClick={() => handleSort('launchDate')}>
+                                    {t.date} {sortConfig.key === 'launchDate' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {currentData.map((app, index) => (
-                                <tr key={`${app.name}-${index}`}>
-                                    <td>
-                                        <div style={{ fontWeight: '600', textTransform: 'capitalize' }}>{cleanName(app.name)}</div>
-                                        <a href={`https://${app.name}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textDecoration: 'none' }}>
-                                            Visit App ↗
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <span className="tag" style={{ background: 'rgba(255,255,255,0.1)' }}>{app.reviews}</span>
-                                    </td>
-                                    <td><span style={{ color: '#fbbf24' }}>★</span> {app.rating}</td>
-                                    <td>{app.launchDate || <span style={{ opacity: 0.5 }}>Unknown</span>}</td>
-                                    <td>
-                                        {/* Highlights for 2024/2025 apps */}
-                                        {app.launchDate && (app.launchDate.includes('2025') || app.launchDate.includes('2024')) ? (
-                                            <span className="tag tag-new">Recent</span>
-                                        ) : null}
-                                    </td>
-                                </tr>
-                            ))}
+                            {currentData.map((app, index) => {
+                                const rawCat = parseCategory(app.category);
+                                const displayCat = categoryTranslations[rawCat] || rawCat; // Translate or fallback
+
+                                return (
+                                    <tr key={`${app.name}-${index}`}>
+                                        <td>
+                                            <div style={{ fontWeight: '600', textTransform: 'capitalize' }}>{cleanName(app.name)}</div>
+                                            <a href={`https://${app.name}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textDecoration: 'none' }}>
+                                                {t.visitApp} ↗
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{displayCat}</span>
+                                        </td>
+                                        <td>
+                                            <span className="tag" style={{ background: 'rgba(255,255,255,0.1)' }}>{app.reviews}</span>
+                                        </td>
+                                        <td><span style={{ color: '#fbbf24' }}>★</span> {app.rating}</td>
+                                        <td>
+                                            {app.launchDate ? app.launchDate.split('·')[0] : <span style={{ opacity: 0.5 }}>-</span>}
+                                            {/* Highlights for 2024/2025 apps */}
+                                            {app.launchDate && (app.launchDate.includes('2025') || app.launchDate.includes('2024')) ? (
+                                                <span style={{ marginLeft: '0.5rem' }} className="tag tag-new">New</span>
+                                            ) : null}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
-                    {filteredData.length === 0 && (
-                        <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                            No apps match your filters.
-                        </div>
-                    )}
                 </div>
             </div>
 
