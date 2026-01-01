@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import allApps from '../data/topAppsRecent.json';
 import { translations, categoryTranslations } from '../translations';
 
@@ -368,24 +369,32 @@ const AppTable = ({ lang = 'vi' }) => {
                 </div>
             )}
 
-            {/* Analysis Modal */}
-            {showModal && analysisData && (
+            {/* Analysis Modal - Uses Portal to escape parent transforms */}
+            {showModal && analysisData && createPortal(
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                    background: 'rgba(0,0,0,0.8)', zIndex: 999,
+                    background: 'rgba(0,0,0,0.8)', zIndex: 9999,
                     display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(5px)'
                 }}>
-                    <div className="glass-panel" style={{ width: '90%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', padding: '2rem', position: 'relative' }}>
+                    <div className="glass-panel" style={{
+                        width: '90%',
+                        maxWidth: '800px',
+                        maxHeight: '90vh',
+                        overflowY: 'auto',
+                        padding: '1.5rem', // Reduced padding
+                        boxSizing: 'border-box', // Fix width overflow
+                        position: 'relative'
+                    }}>
                         <button
                             onClick={() => setShowModal(false)}
-                            style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}
+                            style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}
                         >
                             ×
                         </button>
 
-                        <h2 className="text-gradient" style={{ marginBottom: '1.5rem' }}>{t.analysisTitle}</h2>
+                        <h2 className="text-gradient" style={{ marginBottom: '1.5rem', paddingRight: '1rem', marginTop: '0.5rem' }}>{t.analysisTitle}</h2>
 
-                        <div style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+                        <div style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
                             <Section title="⚡ Tính Năng Chính" content={analysisData.main_features} color="cyan" />
                             <Section title="💎 Mô Hình Giá" content={analysisData.pricing_model} color="green" />
                             <Section title="🔥 Điểm Ăn Tiền (Pros)" content={analysisData.pros} color="pink" />
@@ -395,7 +404,8 @@ const AppTable = ({ lang = 'vi' }) => {
                             <Section title="🚧 Khó Khăn Triển Khai" content={analysisData.implementation_challenges} color="orange" />
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
