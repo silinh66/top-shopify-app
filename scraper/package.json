@@ -1,0 +1,12 @@
+{
+  "name": "shopify-scraper",
+  "version": "1.0.0",
+  "description": "Scrape Shopify apps from sasi.heymantle.com",
+  "main": "crawl_categories.js",
+  "scripts": {
+    "start": "node crawl_categories.js"
+  },
+  "dependencies": {
+    "puppeteer": "^23.0.0"
+  }
+}
