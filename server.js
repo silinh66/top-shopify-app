@@ -166,12 +166,18 @@ app.post('/api/analyze', async (req, res) => {
         // Clean JSON format (sometimes models add markdown)
         text = text.replace(/```json/g, '').replace(/```/g, '').trim();
 
+        // Fix common JSON errors from LLM:
+        // 1. Escape backslashes that are not part of a valid escape sequence (e.g., \T -> \\T)
+        // Valid escapes in JSON: \" \\ \/ \b \f \n \r \t \uXXXX
+        text = text.replace(/\\([^"\\/bfnrtu])/g, '\\\\$1');
+
         // Parse JSON
         let analysisJson;
         try {
             analysisJson = JSON.parse(text);
         } catch (jsonErr) {
-            console.error("JSON Parse Error:", text);
+            console.error("JSON Parse Error Input:", text);
+            // Fallback: Try to use a more permissive parser or just return failure
             return res.status(500).json({ error: "AI response was not valid JSON", raw: text });
         }
 
