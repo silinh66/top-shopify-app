@@ -22,7 +22,7 @@ body {
   font-family: var(--font-body);
   background-color: var(--bg-dark);
   color: var(--text-primary);
-  background-image: 
+  background-image:
     radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 40%);
   min-height: 100vh;
@@ -37,7 +37,10 @@ body {
 }
 
 /* Typography */
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-display);
   font-weight: 600;
   margin: 0;
@@ -117,19 +120,44 @@ h1, h2, h3, h4 {
   align-items: center;
 }
 
+/* Inputs & Selects */
 .search-input {
   background: rgba(0, 0, 0, 0.2);
   border: var(--glass-border);
   border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
   color: white;
-  min-width: 300px;
+  min-width: 200px;
+  /* Reset min-width */
   font-family: var(--font-body);
+  transition: all 0.2s;
 }
 
+select.search-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+  padding-right: 2.5rem;
+  /* Space for arrow */
+  cursor: pointer;
+}
+
+select.search-input:focus,
 .search-input:focus {
   outline: none;
   border-color: var(--accent-cyan);
+  background-color: rgba(30, 41, 59, 0.8);
+  /* Darker background on focus */
+}
+
+/* Fix dropdown options visibility in dark mode (browser dependent but helps) */
+select.search-input option {
+  background-color: var(--bg-dark);
+  color: white;
 }
 
 /* Table */
@@ -148,7 +176,8 @@ h1, h2, h3, h4 {
   color: var(--text-secondary);
   font-weight: 500;
   border-bottom: 1px solid var(--border-color);
-  background: rgba(15, 23, 42, 0.8); /* Semi-transparent header */
+  background: rgba(15, 23, 42, 0.8);
+  /* Semi-transparent header */
   backdrop-filter: blur(8px);
   position: sticky;
   top: 0;
@@ -167,27 +196,27 @@ h1, h2, h3, h4 {
 }
 
 .data-table tr:hover {
-  background-color: rgba(255,255,255,0.02);
+  background-color: rgba(255, 255, 255, 0.02);
 }
 
 .tag {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .tag-new {
-    background: rgba(6, 182, 212, 0.15);
-    color: var(--accent-cyan);
-    border: 1px solid rgba(6, 182, 212, 0.3);
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(6, 182, 212, 0.3);
 }
 
 .tag-hot {
-    background: rgba(236, 72, 153, 0.15);
-    color: var(--accent-pink);
-    border: 1px solid rgba(236, 72, 153, 0.3);
+  background: rgba(236, 72, 153, 0.15);
+  color: var(--accent-pink);
+  border: 1px solid rgba(236, 72, 153, 0.3);
 }
 
 /* Grid for Analysis */
@@ -209,11 +238,25 @@ h1, h2, h3, h4 {
 }
 
 /* Utility to render dynamic gradients classes manually since we use vanilla css */
-.bg-gradient-pink { background: linear-gradient(to right, #ec4899, #f43f5e); }
-.bg-gradient-blue { background: linear-gradient(to right, #60a5fa, #22d3ee); }
-.bg-gradient-amber { background: linear-gradient(to right, #fbbf24, #f97316); }
-.bg-gradient-violet { background: linear-gradient(to right, #8b5cf6, #9333ea); }
-.bg-gradient-gray { background: linear-gradient(to right, #64748b, #334155); }
+.bg-gradient-pink {
+  background: linear-gradient(to right, #ec4899, #f43f5e);
+}
+
+.bg-gradient-blue {
+  background: linear-gradient(to right, #60a5fa, #22d3ee);
+}
+
+.bg-gradient-amber {
+  background: linear-gradient(to right, #fbbf24, #f97316);
+}
+
+.bg-gradient-violet {
+  background: linear-gradient(to right, #8b5cf6, #9333ea);
+}
+
+.bg-gradient-gray {
+  background: linear-gradient(to right, #64748b, #334155);
+}
 
 .card-header {
   height: 6px;
@@ -224,8 +267,15 @@ h1, h2, h3, h4 {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-enter {
